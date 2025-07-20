@@ -2,7 +2,10 @@ langchain
 langchain-groq
 langchain-openai
 langchain-google-genai
+langchain-community
+faiss-cpu
+pypdf
 python-dotenv
 ipykernel
-
--e .
+PyMuPDF
+#-e .
