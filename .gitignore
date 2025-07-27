@@ -213,3 +213,4 @@ __pycache__/
 logs/
 *.pyc
 test.py
+data/*
