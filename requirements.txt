@@ -9,4 +9,5 @@ python-dotenv
 ipykernel
 PyMuPDF
 structlog
+pandas
 #-e .
