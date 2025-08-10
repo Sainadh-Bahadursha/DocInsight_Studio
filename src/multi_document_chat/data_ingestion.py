@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, Te
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from logger.custom_logger import CustomLogger
-from exception.custom_exception_archive import DocumentPortalException
+from exception.custom_exception import DocumentPortalException
 from utils.model_loader import ModelLoader
 class DocumentIngestor:
     SUPPORTED_EXTENSIONS = {'.pdf', '.docx', '.txt', '.md'}
@@ -29,6 +29,7 @@ class DocumentIngestor:
             self.session_faiss_dir.mkdir(parents=True, exist_ok=True)
             
             self.model_loader = ModelLoader()
+            
             self.log.info(
                 "DocumentIngestor initialized",
                 temp_base=str(self.temp_dir),
@@ -84,19 +85,24 @@ class DocumentIngestor:
     def _create_retriever(self, documents):
         try:
             splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=300)
+            
             chunks = splitter.split_documents(documents)
+            
             self.log.info("Documents split into chunks", total_chunks=len(chunks), session_id=self.session_id)
             
             embeddings = self.model_loader.load_embeddings()
+            
             vectorstore = FAISS.from_documents(documents=chunks, embedding=embeddings)
             
             # Save FAISS index under session folder
             vectorstore.save_local(str(self.session_faiss_dir))
+            
             self.log.info("FAISS index saved to disk", path=str(self.session_faiss_dir), session_id=self.session_id)
             
             retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
             
             self.log.info("FAISS retriever created and ready to use", session_id=self.session_id)
+            
             return retriever
             
         except Exception as e:
