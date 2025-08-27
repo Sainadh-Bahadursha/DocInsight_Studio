@@ -216,3 +216,4 @@ test.py
 data/*
 faiss_index/*
 main_archive/
+data/
