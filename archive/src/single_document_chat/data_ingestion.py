@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from logger.custom_logger import CustomLogger
-from exception.custom_exception_archive import DocumentPortalException
+from exception.custom_exception import DocumentPortalException
 from utils.model_loader import ModelLoader
 
 
@@ -35,6 +35,7 @@ class SingleDocIngestor:
                 with open(temp_path, "wb") as f_out:
                     f_out.write(uploaded_file.read()) 
                 self.log.info("PDF saved for ingestion", filename=uploaded_file.name)
+                
                 loader = PyPDFLoader(str(temp_path))
                 docs = loader.load()
                 documents.extend(docs)

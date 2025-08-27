@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import FAISS
 from utils.model_loader import ModelLoader
-from exception.custom_exception_archive import DocumentPortalException
+from exception.custom_exception import DocumentPortalException
 from logger.custom_logger import CustomLogger
 from prompt.prompt_library import PROMPT_REGISTRY
 from model.models import PromptType
@@ -49,7 +49,6 @@ class ConversationalRAG:
             )
             self.retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 5})
             self.log.info("FAISS retriever loaded successfully", index_path=index_path, session_id=self.session_id)
-            self._build_lcel_chain()
             return self.retriever
         
         except Exception as e:
