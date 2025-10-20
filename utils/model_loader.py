@@ -1,47 +1,51 @@
 import os
 import sys
-import json
 from dotenv import load_dotenv
 from utils.config_loader import load_config
 from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 from logger import GLOBAL_LOGGER as log
-from exception.custom_exception import DocInsightStudioException
+from exception.custom_exception import DocumentPortalException
 
 
 class ApiKeyManager:
-    REQUIRED_KEYS = ["GROQ_API_KEY", "GOOGLE_API_KEY"]
+    # All secrets that your ECS container will inject individually
+    REQUIRED_KEYS = [
+        "GROQ_API_KEY",
+        "GOOGLE_API_KEY",
+        "HF_TOKEN",
+        "LLM_PROVIDER",
+        "LANGCHAIN_API_KEY",
+        "LANGCHAIN_TRACING_V2",
+        "LANGCHAIN_ENDPOINT",
+        "LANGCHAIN_PROJECT"
+    ]
 
     def __init__(self):
         self.api_keys = {}
-        raw = os.getenv("API_KEYS")
 
-        if raw:
-            try:
-                parsed = json.loads(raw)
-                if not isinstance(parsed, dict):
-                    raise ValueError("API_KEYS is not a valid JSON object")
-                self.api_keys = parsed
-                log.info("Loaded API_KEYS from ECS secret")
-            except Exception as e:
-                log.warning("Failed to parse API_KEYS as JSON", error=str(e))
-
-        # Fallback to individual env vars
+        # Load from environment variables (in ECS, secrets are injected as env vars)
         for key in self.REQUIRED_KEYS:
-            if not self.api_keys.get(key):
-                env_val = os.getenv(key)
-                if env_val:
-                    self.api_keys[key] = env_val
-                    log.info(f"Loaded {key} from individual env var")
+            value = os.getenv(key)
+            if value:
+                self.api_keys[key] = value
+                log.info(f"Loaded {key} from environment variable")
+            else:
+                log.warning(f"{key} not found in environment variables")
 
-        # Final check
-        missing = [k for k in self.REQUIRED_KEYS if not self.api_keys.get(k)]
+        # Final check for missing keys
+        missing = [k for k in self.REQUIRED_KEYS if k not in self.api_keys]
         if missing:
             log.error("Missing required API keys", missing_keys=missing)
-            raise DocInsightStudioException("Missing API keys", sys)
+            raise DocumentPortalException(
+                f"Missing API keys: {missing}", sys
+            )
 
-        log.info("API keys loaded", keys={k: v[:6] + "..." for k, v in self.api_keys.items()})
-
+        # Mask the keys in logs
+        log.info(
+            "API keys loaded successfully",
+            keys={k: v[:6] + "..." for k, v in self.api_keys.items()}
+        )
 
     def get(self, key: str) -> str:
         val = self.api_keys.get(key)
@@ -56,6 +60,7 @@ class ModelLoader:
     """
 
     def __init__(self):
+        # Load .env only in local development
         if os.getenv("ENV", "local").lower() != "production":
             load_dotenv()
             log.info("Running in LOCAL mode: .env loaded")
@@ -73,18 +78,20 @@ class ModelLoader:
         try:
             model_name = self.config["embedding_model"]["model_name"]
             log.info("Loading embedding model", model=model_name)
-            return GoogleGenerativeAIEmbeddings(model=model_name,
-                                                google_api_key=self.api_key_mgr.get("GOOGLE_API_KEY")) #type: ignore
+            return GoogleGenerativeAIEmbeddings(
+                model=model_name,
+                google_api_key=self.api_key_mgr.get("GOOGLE_API_KEY")  # type: ignore
+            )
         except Exception as e:
             log.error("Error loading embedding model", error=str(e))
-            raise DocInsightStudioException("Failed to load embedding model", sys)
+            raise DocumentPortalException("Failed to load embedding model", sys)
 
     def load_llm(self):
         """
         Load and return the configured LLM model.
         """
         llm_block = self.config["llm"]
-        provider_key = os.getenv("LLM_PROVIDER", "google")
+        provider_key = self.api_key_mgr.get("LLM_PROVIDER")  # always read from env
 
         if provider_key not in llm_block:
             log.error("LLM provider not found in config", provider=provider_key)
@@ -105,14 +112,12 @@ class ModelLoader:
                 temperature=temperature,
                 max_output_tokens=max_tokens
             )
-
         elif provider == "groq":
             return ChatGroq(
                 model=model_name,
-                api_key=self.api_key_mgr.get("GROQ_API_KEY"), #type: ignore
+                api_key=self.api_key_mgr.get("GROQ_API_KEY"),  # type: ignore
                 temperature=temperature,
             )
-
         # elif provider == "openai":
         #     return ChatOpenAI(
         #         model=model_name,
@@ -120,7 +125,6 @@ class ModelLoader:
         #         temperature=temperature,
         #         max_tokens=max_tokens
         #     )
-
         else:
             log.error("Unsupported LLM provider", provider=provider)
             raise ValueError(f"Unsupported LLM provider: {provider}")
