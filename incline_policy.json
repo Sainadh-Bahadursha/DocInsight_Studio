@@ -1,31 +1,57 @@
 {
-    "name of first policy":"AllowECSLogs",
-    "value of the first policy":{
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Sid": "Statement1",
-			"Effect": "Allow",
-			"Action": [
-				"logs:CreateLogGroup",
-				"logs:CreateLogStream",
-				"logs:PutLogEvents"
-			],
-			"Resource": "*"
-		}
-	]
-},
-    "name of the second policy":"AllowSecretsAccess",
-    "value of the second policy":{
-	"Version": "2012-10-17",
-	"Statement": [
-		{
-			"Sid": "Statement1",
-			"Effect": "Allow",
-			"Action": "secretsmanager:GetSecretValue",
-			"Resource": "arn:aws:secretsmanager:ap-southeast-2:839685189558:secret:docinsight_studio_aws_secrets-vPmscf*"
-		}
-	]
-}
-
+  "name of the role": "ecsTaskExecutionRole",
+  "value of the role": {
+    "RoleName": "ecsTaskExecutionRole",
+    "AssumeRolePolicyDocument": {
+      "Version": "2012-10-17",
+      "Statement": [
+        {
+          "Effect": "Allow",
+          "Principal": {
+            "Service": "ecs-tasks.amazonaws.com"
+          },
+          "Action": "sts:AssumeRole"
+        }
+      ]
+    },
+    "ManagedPolicyArns": [
+      "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess",
+      "arn:aws:iam::aws:policy/AmazonECS_FullAccess",
+      "arn:aws:iam::aws:policy/AmazonS3FullAccess",
+      "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess",
+      "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
+    ],
+    "InlinePolicies": [
+      {
+        "PolicyName": "AllowECSLogs",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      },
+      {
+        "PolicyName": "AllowSecretsAccess",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "secretsmanager:GetSecretValue",
+              "Resource": "arn:aws:secretsmanager:ap-southeast-2:839685189558:secret:docinsight_studio_aws_secrets-vPmscf*"
+            }
+          ]
+        }
+      }
+    ]
+  }
 }
