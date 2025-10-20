@@ -175,7 +175,7 @@ Resources:
           LogConfiguration:
             LogDriver: awslogs
             Options:
-              awslogs-group: /ecs/documentportal
+              awslogs-group: /ecs/docinsight-studio
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
 
