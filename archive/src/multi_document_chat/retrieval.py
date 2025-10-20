@@ -8,7 +8,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.vectorstores import FAISS
 from utils.model_loader import ModelLoader
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception import DocInsightStudioException
 from logger.custom_logger import CustomLogger
 from prompt.prompt_library import PROMPT_REGISTRY
 from model.models import PromptType
@@ -30,7 +30,7 @@ class ConversationalRAG:
             
         except Exception as e:
             self.log.error("Failed to initialize ConversationalRAG", error=str(e))
-            raise DocumentPortalException("Initialization error in ConversationalRAG", sys)
+            raise DocInsightStudioException("Initialization error in ConversationalRAG", sys)
             
     
     def load_retiever_from_faiss(self,index_path: str):
@@ -53,7 +53,7 @@ class ConversationalRAG:
         
         except Exception as e:
             self.log.error("Failed to load retriever from FAISS", error=str(e))
-            raise DocumentPortalException("Loading error in ConversationalRAG", sys)
+            raise DocInsightStudioException("Loading error in ConversationalRAG", sys)
 
     def invoke(self,user_input:str,chat_history: Optional[List[BaseMessage]] = None) ->str:
         """
@@ -77,7 +77,7 @@ class ConversationalRAG:
             return answer
         except Exception as e:
             self.log.error("Failed to invoke ConversationalRAG", error=str(e))
-            raise DocumentPortalException("Invocation error in ConversationalRAG", sys)
+            raise DocInsightStudioException("Invocation error in ConversationalRAG", sys)
 
     def _load_llm(self):
         try:
@@ -88,7 +88,7 @@ class ConversationalRAG:
             return llm
         except Exception as e:
             self.log.error("Failed to load LLM", error=str(e))
-            raise DocumentPortalException("LLM loading error in ConversationalRAG", sys)
+            raise DocInsightStudioException("LLM loading error in ConversationalRAG", sys)
     
     @staticmethod
     def _format_docs(docs):
@@ -123,6 +123,6 @@ class ConversationalRAG:
 
         except Exception as e:
             self.log.error("Failed to build LCEL chain", error=str(e), session_id=self.session_id)
-            raise DocumentPortalException("Failed to build LCEL chain", sys)
+            raise DocInsightStudioException("Failed to build LCEL chain", sys)
 
     

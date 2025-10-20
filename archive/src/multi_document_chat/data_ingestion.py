@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader, Te
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception import DocInsightStudioException
 from utils.model_loader import ModelLoader
 class DocumentIngestor:
     SUPPORTED_EXTENSIONS = {'.pdf', '.docx', '.txt', '.md'}
@@ -40,7 +40,7 @@ class DocumentIngestor:
             )
         except Exception as e:
             self.log.error("Failed to initialize DocumentIngestor", error=str(e))
-            raise DocumentPortalException("Initialization error in DocumentIngestor", sys)
+            raise DocInsightStudioException("Initialization error in DocumentIngestor", sys)
             
     
     def ingest_files(self,uploaded_files):
@@ -73,14 +73,14 @@ class DocumentIngestor:
                 documents.extend(docs)
                 
             if not documents:
-                raise DocumentPortalException("No valid documents loaded", sys)
+                raise DocInsightStudioException("No valid documents loaded", sys)
                 
             self.log.info("All documents loaded", total_docs=len(documents), session_id=self.session_id)
             return self._create_retriever(documents)
                   
         except Exception as e:
             self.log.error("Failed to ingest files", error=str(e))
-            raise DocumentPortalException("Ingestion error in DocumentIngestor", sys)
+            raise DocInsightStudioException("Ingestion error in DocumentIngestor", sys)
 
     def _create_retriever(self, documents):
         try:
@@ -107,4 +107,4 @@ class DocumentIngestor:
             
         except Exception as e:
             self.log.error("Failed to create retriever", error=str(e))
-            raise DocumentPortalException("Retrieval error in DocumentIngestor", sys)
+            raise DocInsightStudioException("Retrieval error in DocumentIngestor", sys)

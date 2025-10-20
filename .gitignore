@@ -207,7 +207,7 @@ marimo/_lsp/
 __marimo__/
 
 
-document_portal.egg-info
+docinsight_studio.egg-info
 venv/
 __pycache__/
 logs/

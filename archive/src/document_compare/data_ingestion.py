@@ -4,7 +4,7 @@ from pathlib import Path
 import fitz
 from datetime import datetime, timezone
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception import DocInsightStudioException
 
 
 class DocumentIngestion:
@@ -43,7 +43,7 @@ class DocumentIngestion:
 
         except Exception as e:
             self.log.error("Error saving PDF files", error=str(e), session=self.session_id)
-            raise DocumentPortalException("Error saving files", sys)
+            raise DocInsightStudioException("Error saving files", sys)
 
     def read_pdf(self, pdf_path: Path) -> str:
         """
@@ -66,7 +66,7 @@ class DocumentIngestion:
 
         except Exception as e:
             self.log.error("Error reading PDF", file=str(pdf_path), error=str(e))
-            raise DocumentPortalException("Error reading PDF", sys)
+            raise DocInsightStudioException("Error reading PDF", sys)
 
     def combine_documents(self) -> str:
         """
@@ -85,7 +85,7 @@ class DocumentIngestion:
 
         except Exception as e:
             self.log.error("Error combining documents", error=str(e), session=self.session_id)
-            raise DocumentPortalException("Error combining documents", sys)
+            raise DocInsightStudioException("Error combining documents", sys)
 
     def clean_old_sessions(self, keep_latest: int = 3):
         """
@@ -104,4 +104,4 @@ class DocumentIngestion:
 
         except Exception as e:
             self.log.error("Error cleaning old sessions", error=str(e))
-            raise DocumentPortalException("Error cleaning old sessions", sys)
+            raise DocInsightStudioException("Error cleaning old sessions", sys)

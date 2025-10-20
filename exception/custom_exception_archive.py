@@ -1,6 +1,6 @@
 import sys
 import traceback
-class DocumentPortalException(Exception):
+class DocInsightStudioException(Exception):
     def __init__(self, error_message, error_details):
         _, _, exc_tb = error_details.exc_info()
         self.file_name = exc_tb.tb_frame.f_code.co_filename
@@ -20,10 +20,10 @@ if __name__ == "__main__":
     try:
         a = 1 / 0  # deliberate error
     except Exception as e:
-        app_exc = DocumentPortalException(e, sys)
+        app_exc = DocInsightStudioException(e, sys)
         #logger.error(app_exc)  # log it to file
         raise app_exc  # propagate with full traceback
     # try:
     #     a = int("abc")  # ValueError (inbuilt)
     # except ValueError as e:
-    #     raise DocumentPortalException("Failed while processing document", e)
+    #     raise DocInsightStudioException("Failed while processing document", e)

@@ -6,7 +6,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception import DocInsightStudioException
 from utils.model_loader import ModelLoader
 
 
@@ -22,7 +22,7 @@ class SingleDocIngestor:
             self.log.info("SingleDocIngestor initialized", temp_path=str(self.data_dir), faiss_path=str(self.faiss_dir))
         except Exception as e:
             self.log.error("Failed to initialize SingleDocIngestor", error=str(e))
-            raise DocumentPortalException("Initialization error in SingleDocIngestor", sys)
+            raise DocInsightStudioException("Initialization error in SingleDocIngestor", sys)
         
     def ingest_files(self,uploaded_files):
         try:
@@ -44,7 +44,7 @@ class SingleDocIngestor:
                 
         except Exception as e:
             self.log.error("Document ingestion failed", error=str(e))
-            raise DocumentPortalException("Error during file ingestion", sys)
+            raise DocInsightStudioException("Error during file ingestion", sys)
         
     def _create_retriever(self,documents):
         try:
@@ -64,4 +64,4 @@ class SingleDocIngestor:
             return retriever  
         except Exception as e:
             self.log.error("Retriever creation failed", error=str(e))
-            raise DocumentPortalException("Error creating FAISS retriever", sys)
+            raise DocInsightStudioException("Error creating FAISS retriever", sys)
